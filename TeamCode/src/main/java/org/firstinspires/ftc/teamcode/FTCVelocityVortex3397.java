@@ -34,7 +34,7 @@ public class FTCVelocityVortex3397 extends OpMode {
     GameButton  collectorButton     = new GameButton(gamepad2, GameButton.Label.RBumper);
     GameButton  rewindButton        = new GameButton(gamepad2, GameButton.Label.dpadDown);
     GameButton  tensionButton       = new GameButton(gamepad2, GameButton.Label.dpadUp);
-    GameButton  releaseButton       = new GameButton(gamepad2, GameButton.Label.a);
+    GameButton  lockButton       = new GameButton(gamepad2, GameButton.Label.a);
 
 
 
