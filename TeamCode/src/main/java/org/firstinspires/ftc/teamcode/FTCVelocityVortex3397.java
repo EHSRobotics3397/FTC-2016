@@ -4,8 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.teamcode.CarDriveModule;
 import org.firstinspires.ftc.teamcode.CollectorModule;
+import org.firstinspires.ftc.teamcode.ThrowerModule;
 import org.firstinspires.ftc.teamcode.GameButton;
 
 /**
@@ -19,12 +22,23 @@ public class FTCVelocityVortex3397 extends OpMode {
     DcMotor     rightMotor;
     DcMotor     leftMotor;
     DcMotor     collectorMotor;
+    DcMotor     rewindMotor;
+    Servo       latchServo;
+
     double      driveX          = 0.0;
     double      driveY          = 0.0;
     double      rTrigger        = 0.0;
     double[]    driveReturns    = new double[5];
     boolean     collectorOn     = false;
-    GameButton  rBumper         = new GameButton(gamepad1, GameButton.Label.RBumper);
+
+    GameButton  collectorButton     = new GameButton(gamepad2, GameButton.Label.RBumper);
+    GameButton  rewindButton        = new GameButton(gamepad2, GameButton.Label.dpadDown);
+    GameButton  tensionButton       = new GameButton(gamepad2, GameButton.Label.dpadUp);
+    GameButton  releaseButton       = new GameButton(gamepad2, GameButton.Label.a);
+
+
+
+    String      launchState     = "Latched";
 
 
     @Override
@@ -32,16 +46,19 @@ public class FTCVelocityVortex3397 extends OpMode {
         leftMotor      = hardwareMap.dcMotor.get("motorLeft");
         rightMotor     = hardwareMap.dcMotor.get("motorRight");
         collectorMotor = hardwareMap.dcMotor.get("motorCollector");
+        rewindMotor    = hardwareMap.dcMotor.get("motorRewind");
+        latchServo     = hardwareMap.servo.get("servoLatch");
+
     }
 
     @Override
     public void loop(){
 
-        rTrigger    = gamepad1.right_trigger;
+        rTrigger    = gamepad2.right_trigger;
         driveY      = gamepad1.left_stick_y;
         driveX      = gamepad1.right_stick_x;
 
-        if(rBumper.Release()){
+        if(collectorButton.Release()){
             CollectorModule.toggleCollector(collectorMotor, collectorOn);
             collectorOn = !collectorOn;
         }
