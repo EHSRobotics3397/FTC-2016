@@ -13,10 +13,10 @@ public class EncoderEventAutonomousTest extends OpMode {
     DcMotor motorRight;
     DcMotor motorLeft;
 
-    int leftEncoderStart = 0;
-    int rightEncoderStart = 0;
-    int leftCount = 0;
-    int rightCount = 0;
+    private int leftEncoderStart = 0;
+    private int rightEncoderStart = 0;
+    private int leftCount = 0;
+    private int rightCount = 0;
 
     boolean motorRun;
 
@@ -71,7 +71,7 @@ public class EncoderEventAutonomousTest extends OpMode {
         if (!motorRun)
             StopMotors();
         else {
-            double pwr;
+            double pwr = 0.0;
             tickRemain = tickTarget - leftCount;
             if (tickRemain > 0 ) {
                 pwr = 0.25 * (double) (tickRemain) / tickTarget;
@@ -79,10 +79,7 @@ public class EncoderEventAutonomousTest extends OpMode {
                 if (pwr < minPower)
                     pwr = minPower;
             }
-            else
-                pwr = 0.0;
-
-            motorRight.setPower(pwr);
+            else            motorRight.setPower(pwr);
             motorLeft.setPower(pwr);
         }
 

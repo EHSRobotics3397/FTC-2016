@@ -36,10 +36,13 @@ public class FTCVelocityVortex3397 extends OpMode {
     GameButton  tensionButton       = new GameButton(gamepad2, GameButton.Label.dpadUp);
     GameButton  releaseButton       = new GameButton(gamepad2, GameButton.Label.a);
 
-
+    GameButton  spinRightButton = new GameButton(gamepad1, GameButton.Label.dpadRight);
+    GameButton  spinLeftButton = new GameButton(gamepad1, GameButton.Label.dpadLeft);
 
     String      launchState     = "Latched";
 
+    private SpinDriveModule spinModule;
+    private CarDriveModule driveModule;
 
     @Override
     public void init(){
@@ -49,6 +52,14 @@ public class FTCVelocityVortex3397 extends OpMode {
         rewindMotor    = hardwareMap.dcMotor.get("motorRewind");
         latchServo     = hardwareMap.servo.get("servoLatch");
 
+        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        spinModule = new SpinDriveModule();
+        spinModule.setup(spinRightButton, spinLeftButton, leftMotor, rightMotor );
+
+        driveModule = new CarDriveModule();
+        driveModule.setup(leftMotor, rightMotor);
     }
 
     @Override
@@ -63,7 +74,9 @@ public class FTCVelocityVortex3397 extends OpMode {
             collectorOn = !collectorOn;
         }
 
-        driveReturns = CarDriveModule.drive(driveX, driveY, rightMotor, leftMotor);
+        driveReturns = driveModule.drive(driveX, driveY);
+
+        spinModule.update();
 
         Display();
     }

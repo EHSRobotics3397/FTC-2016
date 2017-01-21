@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 /**
  * Created by greenteam on 1/20/17.
+ * Used to throw the ball.
  */
 
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,19 +12,20 @@ import org.firstinspires.ftc.teamcode.ServoControlTest;
 
 public class ThrowerModule {
 
-    public enum State {LOCKED, REWINDING, TENSIONING, RELEASED};
-    float TENSION_POWER = 0.25f;
-    float REWIND_POWER  = -0.25f;
+    public enum State {LOCKED, REWINDING, TENSIONING, RELEASED}
+
+    private float TENSION_POWER = 0.25f;
+    private float REWIND_POWER  = -0.25f;
 
     State state = State.LOCKED;
 
-    DcMotor     _rewindMotor;
-    Servo       _latchServo;
-    GameButton _rewindButton;
-    GameButton _tensionButton;
-    GameButton _latchButton;
-    GameButton _lockButton;
-    double _releaseTrigger;
+    private DcMotor     _rewindMotor;
+    private Servo       _latchServo;
+    private GameButton _rewindButton;
+    private GameButton _tensionButton;
+    private GameButton _latchButton;
+    private GameButton _lockButton;
+    private double _releaseTrigger;
 
     public void setButtonAndMotors(DcMotor rewindMotor, Servo latchServo,
                                    GameButton rewindButton, GameButton tensionButton,
@@ -36,12 +38,6 @@ public class ThrowerModule {
         _latchButton = latchButton;
         _lockButton = latchButton;
         _releaseTrigger = releaseTrigger;
-
-
-
-
-
-
     }
 
     public void updateThrower(){
@@ -76,7 +72,7 @@ public class ThrowerModule {
 
     }
 
-    public void idle() {
+    private void idle() {
         
     }
 

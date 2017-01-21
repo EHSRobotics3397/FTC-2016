@@ -2,9 +2,18 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
-public class CarDriveModule {	
 
-	public static double[] drive(double x, double y, DcMotor rightMotor, DcMotor leftMotor){
+public class CarDriveModule {
+
+	DcMotor leftMotor;
+	DcMotor rightMotor;
+
+	public void setup(DcMotor rm, DcMotor lm) {
+		leftMotor = lm;
+		rightMotor = rm;
+	}
+
+	public double[] drive(double x, double y){
 		double scaleFactor    = 1;
 		double spinThreshhold = 0.2;
 
