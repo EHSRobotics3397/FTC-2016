@@ -10,4 +10,6 @@ Gamepad1:
 
 Gamepad2:
 
-    Drive: analog sticks
+    Drive:
+        left analog stick: Throttle
+        right analog stick: steering/spin turn
