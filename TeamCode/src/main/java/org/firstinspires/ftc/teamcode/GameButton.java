@@ -10,13 +10,15 @@ public class GameButton  {
     private boolean state;
     private boolean lastState;
     private boolean press;
+    private float   analogState;
     private boolean release;
     private Gamepad pad;
 
     public enum Label{
         a,b,x,y,
         RBumper, LBumper,
-        dpadUp, dpadDown, dpadLeft, dpadRight
+        dpadUp, dpadDown, dpadLeft, dpadRight,
+        analogLeft, analogRight
     };
 
     Label buttonLabel;
@@ -59,6 +61,9 @@ public class GameButton  {
         }
         else if (buttonLabel == Label.dpadDown) {
             state = pad.dpad_down;
+        }
+        else if (buttonLabel == Label.analogRight){
+            analogState = pad.right_stick_x;
         }
 
         press = state && !lastState;

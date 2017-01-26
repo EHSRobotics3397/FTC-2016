@@ -31,11 +31,14 @@ public class FTCVelocityVortex3397 extends OpMode {
     double[]    driveReturns    = new double[5];
     boolean     collectorOn     = false;
 
+
+    // Register Control Buttons for Gamepad2
     GameButton  collectorButton     = new GameButton(gamepad2, GameButton.Label.RBumper);
     GameButton  rewindButton        = new GameButton(gamepad2, GameButton.Label.dpadDown);
     GameButton  tensionButton       = new GameButton(gamepad2, GameButton.Label.dpadUp);
     GameButton  lockButton       = new GameButton(gamepad2, GameButton.Label.a);
 
+    // Register Drive buttons for Gamepad1
     GameButton  spinRightButton = new GameButton(gamepad1, GameButton.Label.dpadRight);
     GameButton  spinLeftButton = new GameButton(gamepad1, GameButton.Label.dpadLeft);
 
