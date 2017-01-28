@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 /**
  * Created by greenteam on 12/10/16.
  */
+
 public class GameButton  {
 
     private boolean state;
@@ -18,16 +19,17 @@ public class GameButton  {
         a,b,x,y,
         RBumper, LBumper,
         dpadUp, dpadDown, dpadLeft, dpadRight,
-        analogLeft, analogRight
+        analogLeft, analogRight, RTrigger, LTrigger
     };
 
     Label buttonLabel;
 
     public GameButton(Gamepad somePad, Label someLabel) {
-        pad = somePad;
+        pad         = somePad;
         buttonLabel = someLabel;
-        state = false;
-        lastState = false;
+        state       = false;
+        lastState   = false;
+        analogState = 0;
     }
 
     public void Update() {
@@ -65,9 +67,18 @@ public class GameButton  {
         else if (buttonLabel == Label.analogRight){
             analogState = pad.right_stick_x;
         }
+        else if (buttonLabel == Label.analogLeft){
+            analogState = pad.right_stick_y;
+        }
+        else if (buttonLabel == Label.LTrigger){
+            analogState = pad.left_trigger;
+        }
+        else if (buttonLabel == Label.RTrigger){
+            analogState = pad.right_trigger;
+        }
 
-        press = state && !lastState;
-        release = !state && lastState;
+        press     = state && !lastState;
+        release   = !state && lastState;
         lastState = state;
     }
 
@@ -83,4 +94,6 @@ public class GameButton  {
     public boolean IsDown() { return state;}
 
     public boolean IsUp() { return !state;}
+
+    public double analogRead(){return analogState;}
 }
