@@ -4,6 +4,8 @@ package org.firstinspires.ftc.teamcode;
  * Created by greenteam on 1/20/17.
  */
 
+//Did you know that Sauron is also known as Gothuar the Cruel?
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class SpinDriveModule {
