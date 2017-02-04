@@ -11,7 +11,7 @@ public class GameButton  {
     private boolean state;
     private boolean lastState;
     private boolean press;
-    private float   analogState;
+    private float analogValue;
     private boolean release;
     private Gamepad pad;
 
@@ -29,7 +29,7 @@ public class GameButton  {
         buttonLabel = someLabel;
         state       = false;
         lastState   = false;
-        analogState = 0;
+        analogValue = 0.0f;
     }
 
     public void Update() {
@@ -65,16 +65,16 @@ public class GameButton  {
             state = pad.dpad_down;
         }
         else if (buttonLabel == Label.analogRight){
-            analogState = pad.right_stick_x;
+            analogValue = pad.right_stick_y;
         }
         else if (buttonLabel == Label.analogLeft){
-            analogState = pad.right_stick_y;
+            analogValue = pad.left_stick_x;
         }
         else if (buttonLabel == Label.LTrigger){
-            analogState = pad.left_trigger;
+            analogValue = pad.left_trigger;
         }
         else if (buttonLabel == Label.RTrigger){
-            analogState = pad.right_trigger;
+            analogValue = pad.right_trigger;
         }
 
         press     = state && !lastState;
@@ -95,5 +95,5 @@ public class GameButton  {
 
     public boolean IsUp() { return !state;}
 
-    public double analogRead(){return analogState;}
+    public float analogRead(){return analogValue;}
 }

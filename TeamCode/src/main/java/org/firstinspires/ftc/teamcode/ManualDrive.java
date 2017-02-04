@@ -24,87 +24,69 @@ public class ManualDrive extends OpMode {
     private Servo       latchServo;
     private TouchSensor rewindSensor;
 
-    private double[]    driveReturns    = new double[5];
-    private boolean     collectorOn     = false;
-
-
     // Register Control Buttons for Gamepad2
-    private GameButton  collectorButton     = new GameButton(gamepad2, GameButton.Label.RBumper);
+    private GameButton  collectorForward    = new GameButton(gamepad2, GameButton.Label.RBumper);
+    private GameButton  collectorBackward   = new GameButton(gamepad2, GameButton.Label.LBumper);
     private GameButton  rewindButton        = new GameButton(gamepad2, GameButton.Label.dpadDown);
     private GameButton  tensionButton       = new GameButton(gamepad2, GameButton.Label.dpadUp);
     private GameButton  lockButton          = new GameButton(gamepad2, GameButton.Label.a); // for testing purposes
     private GameButton  liftUp              = new GameButton(gamepad2, GameButton.Label.LTrigger);
     private GameButton  liftDown            = new GameButton(gamepad2, GameButton.Label.LBumper);
     private GameButton  fireButton          = new GameButton(gamepad2, GameButton.Label.RTrigger);
-    private GameButton  prongButton         = new GameButton(gamepad2, GameButton.Label.b);
+    private GameStick   driveStickLeft      = new GameStick(gamepad1, GameStick.Label.Left);
+    private GameStick   driveStickRight     = new GameStick(gamepad1, GameStick.Label.Right);
 
-    // Register Drive buttons for Gamepad1
-    private GameButton  spinRightButton     = new GameButton(gamepad1, GameButton.Label.dpadRight);
-    private GameButton  spinLeftButton      = new GameButton(gamepad1, GameButton.Label.dpadLeft);
-    private GameButton  driveStickLeft      = new GameButton(gamepad1, GameButton.Label.analogLeft);
-    private GameButton  driveStickRight     = new GameButton(gamepad1, GameButton.Label.analogRight);
-
-    private SpinDrive spinDrive;
     private CarDrive carDrive;
     private Collector collector;
     private Thrower thrower;
     private Lift lift;
     private Prong prong;
+    private Latch latch;
+    private ThrowTest throwtest;
 
     @Override
     public void init(){
-        leftMotor      = hardwareMap.dcMotor.get("leftMotor");
-        rightMotor     = hardwareMap.dcMotor.get("rightMotor");
-        collectorMotor = hardwareMap.dcMotor.get("collectMotor");
-        rewindMotor    = hardwareMap.dcMotor.get("throwMotor");
-        liftMotorRight = hardwareMap.dcMotor.get("rightLiftMotor");
-        liftMotorLeft  = hardwareMap.dcMotor.get("leftLiftMotor");
-        latchServo     = hardwareMap.servo.get("latchServo");
-        rewindSensor   = hardwareMap.touchSensor.get("rewindSensor");
 
+        //leftMotor       = hardwareMap.dcMotor.get("leftMotor");
+        //rightMotor      = hardwareMap.dcMotor.get("rightMotor");
 
-        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //collectorMotor  = hardwareMap.dcMotor.get("collectMotor");
 
-        thrower = new Thrower();
-        thrower.setup(rewindMotor, latchServo, rewindButton, tensionButton, fireButton, rewindSensor); //add sensor
+        rewindMotor  = hardwareMap.dcMotor.get("throwMotor");
+        latchServo   = hardwareMap.servo.get("latchServo");
+        rewindSensor = hardwareMap.touchSensor.get("rewindSensor");
 
-        spinDrive = new SpinDrive();
-        spinDrive.setup(spinRightButton, spinLeftButton, leftMotor, rightMotor );
+        //liftMotorRight  = hardwareMap.dcMotor.get("rightLiftMotor");
+        //liftMotorLeft   = hardwareMap.dcMotor.get("leftLiftMotor");
 
-        carDrive = new CarDrive();
-        carDrive.setup(leftMotor, rightMotor, driveStickLeft, driveStickRight);
+       // thrower = new Thrower();
+       // thrower.setup(rewindMotor, latchServo, rewindButton, tensionButton, fireButton, rewindSensor); //add sensor
 
-        collector = new Collector();
-        collector.setup(collectorMotor, collectorButton);
+        //carDrive = new CarDrive();
+        //carDrive.setup(leftMotor, rightMotor, gamepad1);
 
-        lift = new Lift();
-        lift.setup(liftMotorLeft, liftMotorRight, liftUp, liftDown);
+        //collector = new Collector();
+        //collector.setup(collectorMotor, gamepad2);
 
-        prong = new Prong();
-        prong.setup(prongButton, liftMotorLeft, liftMotorRight);
+        //lift = new Lift();
+        //lift.setup(liftMotorLeft, liftMotorRight, gamepad2);
 
+        latch = new Latch();
+        latch.setup(gamepad2, latchServo);
+
+        throwtest = new ThrowTest();
+        throwtest.setup(rewindMotor, rewindSensor, gamepad2);
 
     }
 
     @Override
-    public void loop(){
-        collector.update();
-        carDrive.update();   //not using returns for now
-        spinDrive.update();
-        lift.update();
-        thrower.update();
-        Display();
-    }//Lel <-- carl
-
-    private void Display(){
-        telemetry.addData("Collector Running",   ": " + collectorOn);
-        //telemetry.addData("Drive Left",          ": " + driveReturns[0]);
-        //telemetry.addData("Drive Right",         ": " + driveReturns[1]);
-        //telemetry.addData("Drive Scale",         ": " + driveReturns[2]);
-        //telemetry.addData("Drive X",             ": " + driveReturns[3]);
-        //telemetry.addData("Drive Y",             ": " + driveReturns[4]);
-
+    public void loop() {
+       //collector.update(telemetry);
+        //carDrive.update(telemetry);
+        //lift.update(telemetry);
+        //thrower.update(telemetry);
+        latch.update(telemetry);
+        throwtest.update(telemetry);
     }
 
 }
