@@ -1,11 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Path;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -38,8 +34,10 @@ public class VuforiaTest extends LinearOpMode {
     VuforiaLocalizer vuforiaLocalizer;
     VuforiaLocalizer.Parameters parameters;
     VuforiaTrackables visionTargets;
-    VuforiaTrackable target;
-    VuforiaTrackableDefaultListener listener;
+    VuforiaTrackable target01;
+    VuforiaTrackable target02;
+    VuforiaTrackableDefaultListener listener01;
+    VuforiaTrackableDefaultListener listener02;
 
     OpenGLMatrix lastKnownLocation;
     OpenGLMatrix phoneLocation;
@@ -77,16 +75,17 @@ public class VuforiaTest extends LinearOpMode {
         while(opModeIsActive()) {
             //a more robust approach - figure out what images we have in the field of view and
             //track using the closest. Want to avoid having to check all four.
-            OpenGLMatrix latestLocation = listener.getUpdatedRobotLocation();
+            OpenGLMatrix latestLocation = listener01.getUpdatedRobotLocation();
             if (latestLocation != null)
                 lastKnownLocation = latestLocation;
 
-            float distance = Mm2Inches*DistanceFlat(lastKnownLocation, target.getLocation());
+            float distance = Mm2Inches*DistanceFlat(lastKnownLocation, target01.getLocation());
 
-            telemetry.addData("Tracking: " + target.getName(), listener.isVisible());
-            telemetry.addData("Last known location: ", formatMatrix(lastKnownLocation));
-            telemetry.addData("Target location: ", formatMatrix(target.getLocation()));
-            telemetry.addData("Target location2 : ", XYZLocation(target.getLocation()));
+            telemetry.addData("Tracking: " + target01.getName(), listener01.isVisible());
+            telemetry.addData("Tracking: " + target02.getName(), listener02.isVisible());
+
+            telemetry.addData("Last known location: ", XYZLocation(lastKnownLocation));
+            telemetry.addData("Target location: ", XYZLocation(target01.getLocation()));
             telemetry.addData("Distance to target: ", String.format("%2.3f", distance));
             telemetry.update();
             idle();
@@ -94,8 +93,8 @@ public class VuforiaTest extends LinearOpMode {
     }
 
     private void setObjectLocations() {
-        blueBeacon1 = createMatrix(0, 84*Inches2mm, 0, 0, -90, -90);
-        blueBeacon2 = createMatrix(0, 36*Inches2mm, 0, 0, -90, -90);
+        blueBeacon1 = createMatrix(0, 84*Inches2mm, 0, 90, 0, 90);
+        blueBeacon2 = createMatrix(0, 36*Inches2mm, 0, 00, 0, 180);
         blueStart1 = createMatrix(60*Inches2mm, 144*Inches2mm, 0, 0, 0, 0);
         blueStart2 = createMatrix(84*Inches2mm, 144*Inches2mm, 0, 0, 0, 0);
         blueLargeBall= createMatrix(60*Inches2mm, 84*Inches2mm, 0, 0, 0, 0);
@@ -109,15 +108,20 @@ public class VuforiaTest extends LinearOpMode {
         vuforiaLocalizer = ClassFactory.createVuforiaLocalizer(parameters);
 
         visionTargets = vuforiaLocalizer.loadTrackablesFromAsset("FTC_2016-17");
-
-        target = visionTargets.get(WHEELS);
-        target.setName("Wheels Target");
-        target.setLocation(blueBeacon1);
         phoneLocation = blueStart1;
 
-        listener = (VuforiaTrackableDefaultListener) target.getListener();
-        listener.setPhoneInformation(phoneLocation, parameters.cameraDirection);
+        target01 = visionTargets.get(WHEELS);
+        target01.setName("Wheels Target");
+        target01.setLocation(blueBeacon1);
 
+        listener01 = (VuforiaTrackableDefaultListener) target01.getListener();
+        listener01.setPhoneInformation(phoneLocation, parameters.cameraDirection);
+
+        target02 = visionTargets.get(LEGOS);
+        target02.setName("Legos Target");
+        target02.setLocation(blueBeacon2);
+        listener02 = (VuforiaTrackableDefaultListener) target02.getListener();
+        listener02.setPhoneInformation(phoneLocation, parameters.cameraDirection);
     }
 
     private OpenGLMatrix createMatrix(float x, float y, float z, float u, float v, float w) {
@@ -151,10 +155,11 @@ public class VuforiaTest extends LinearOpMode {
         StringBuffer buffer = new StringBuffer();
         VectorF v = matrix.getTranslation();
         float[] xyz = v.getData();
+        float x = Mm2Inches*xyz[0];
+        float y = Mm2Inches*xyz[1];
+        float z = Mm2Inches*xyz[2];
 
-        buffer.append(String.format("x: %2.3f",xyz[0]));
-        buffer.append(String.format("y: %2.3f",xyz[1]));
-        buffer.append(String.format("z: %2.3f",xyz[2]));
+        buffer.append(String.format("(%2.3f, %2.3f, %2.3f)", x, y, z));
         return buffer.toString();
     }
 }
