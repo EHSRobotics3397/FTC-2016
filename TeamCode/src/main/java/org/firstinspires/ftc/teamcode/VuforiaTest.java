@@ -81,10 +81,12 @@ public class VuforiaTest extends LinearOpMode {
             if (latestLocation != null)
                 lastKnownLocation = latestLocation;
 
-            float distance = Mm2Inches*DistanceFlat(latestLocation, target.getLocation());
+            float distance = Mm2Inches*DistanceFlat(lastKnownLocation, target.getLocation());
 
             telemetry.addData("Tracking: " + target.getName(), listener.isVisible());
             telemetry.addData("Last known location: ", formatMatrix(lastKnownLocation));
+            telemetry.addData("Target location: ", formatMatrix(target.getLocation()));
+            telemetry.addData("Target location2 : ", XYZLocation(target.getLocation()));
             telemetry.addData("Distance to target: ", String.format("%2.3f", distance));
             telemetry.update();
             idle();
@@ -131,8 +133,8 @@ public class VuforiaTest extends LinearOpMode {
     private float DistanceFlat(OpenGLMatrix pos1, OpenGLMatrix pos2) {
         VectorF v1 = pos1.getTranslation();
         VectorF v2 = pos2.getTranslation();
-        VectorF offset = v1;
-        offset.subtract(v2);
+        VectorF offset = new VectorF(v2.getData());
+        offset.subtract(v1);
 
         double xDist = (double) offset.getData()[0];
         double yDist = (double) offset.getData()[1];
@@ -143,5 +145,16 @@ public class VuforiaTest extends LinearOpMode {
 
     private String formatMatrix(OpenGLMatrix matrix) {
         return matrix.formatAsTransform();
+    }
+
+    private String XYZLocation(OpenGLMatrix matrix) {
+        StringBuffer buffer = new StringBuffer();
+        VectorF v = matrix.getTranslation();
+        float[] xyz = v.getData();
+
+        buffer.append(String.format("x: %2.3f",xyz[0]));
+        buffer.append(String.format("y: %2.3f",xyz[1]));
+        buffer.append(String.format("z: %2.3f",xyz[2]));
+        return buffer.toString();
     }
 }
