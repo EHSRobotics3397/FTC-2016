@@ -5,12 +5,13 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 /**
  * Created by greenteam on 12/10/16.
  */
+
 public class GameButton  {
 
     private boolean state;
     private boolean lastState;
     private boolean press;
-    private float   analogState;
+    private float analogValue;
     private boolean release;
     private Gamepad pad;
 
@@ -18,16 +19,17 @@ public class GameButton  {
         a,b,x,y,
         RBumper, LBumper,
         dpadUp, dpadDown, dpadLeft, dpadRight,
-        analogLeft, analogRight
+        analogLeft, analogRight, RTrigger, LTrigger
     };
 
     Label buttonLabel;
 
     public GameButton(Gamepad somePad, Label someLabel) {
-        pad = somePad;
+        pad         = somePad;
         buttonLabel = someLabel;
-        state = false;
-        lastState = false;
+        state       = false;
+        lastState   = false;
+        analogValue = 0.0f;
     }
 
     public void Update() {
@@ -63,11 +65,20 @@ public class GameButton  {
             state = pad.dpad_down;
         }
         else if (buttonLabel == Label.analogRight){
-            analogState = pad.right_stick_x;
+            analogValue = pad.right_stick_y;
+        }
+        else if (buttonLabel == Label.analogLeft){
+            analogValue = pad.left_stick_x;
+        }
+        else if (buttonLabel == Label.LTrigger){
+            analogValue = pad.left_trigger;
+        }
+        else if (buttonLabel == Label.RTrigger){
+            analogValue = pad.right_trigger;
         }
 
-        press = state && !lastState;
-        release = !state && lastState;
+        press     = state && !lastState;
+        release   = !state && lastState;
         lastState = state;
     }
 
@@ -83,4 +94,6 @@ public class GameButton  {
     public boolean IsDown() { return state;}
 
     public boolean IsUp() { return !state;}
+
+    public float analogRead(){return analogValue;}
 }
