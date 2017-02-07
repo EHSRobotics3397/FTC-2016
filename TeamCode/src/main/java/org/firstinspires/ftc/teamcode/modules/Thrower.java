@@ -24,8 +24,7 @@ public class Thrower{
     private GameStick  rTrigger;
     private Servo   latchServo;
     private boolean latchOpen = false;
-    double closePosition = 1.0;
-    double firePosition = 0.5;
+
     private int fireVal = -1080;
     private int rewindVal = 0;
     private String latchState = "Closed";
@@ -35,6 +34,10 @@ public class Thrower{
     private int hysteresis = 15;
     private String stateString;
     private GameButton aButton;
+    long startTime;
+    static final double LATCH_CLOSE_POSITION = 0.8;
+    static final double LATCH_FIRE_POSITION = 0.5;
+    static final long REWIND_WAIT_MS = 250;
 
     public void setup(DcMotor rewind,TouchSensor sensor, Gamepad pad, Servo latch){
         rewindMotor = rewind;
@@ -44,7 +47,7 @@ public class Thrower{
         aButton = new GameButton(pad, GameButton.Label.a);
         setState(State.RELEASED);
        // rewindMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        latchServo.setPosition(closePosition);
+        latchServo.setPosition(LATCH_CLOSE_POSITION);
 
     }
 
@@ -83,7 +86,7 @@ public class Thrower{
 
     private void closeLatch(){
         if(latchOpen) {
-            latchServo.setPosition(closePosition);
+            latchServo.setPosition(LATCH_CLOSE_POSITION);
             latchOpen = false;
         }
         encoderStart = rewindMotor.getCurrentPosition();
@@ -91,7 +94,7 @@ public class Thrower{
 
     public void openLatch(){
         if(!latchOpen) {
-            latchServo.setPosition(firePosition);
+            latchServo.setPosition(LATCH_FIRE_POSITION);
             latchOpen = true;
         }
     }
@@ -115,8 +118,6 @@ public class Thrower{
         }
     }
 
-
-
     private void tension(){
         running = true;
         encoderVal = rewindMotor.getCurrentPosition();
@@ -129,14 +130,16 @@ public class Thrower{
     private void release(){
         openLatch();
         rewindMotor.setPower(0.0f);
-        if(aButton.Press()){
+
+        long elapsedTime  = System.currentTimeMillis() - startTime;
+        if(aButton.Press() || elapsedTime > REWIND_WAIT_MS){
             setState(State.REWINDING);
         }
     }
 
-    private void setState(State newState){
+    private void setState(State newState)
+    {
+        startTime = System.currentTimeMillis();
         state = newState;
     }
-
-
 }

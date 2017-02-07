@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.modules.*;
  * Main Drive Opmode
  */
 
-@TeleOp(name = "UniDrive", group = "Drive")
+@TeleOp(name = "ManualDrive", group = "Drive")
 
 public class ManualDrive extends OpMode {
 
