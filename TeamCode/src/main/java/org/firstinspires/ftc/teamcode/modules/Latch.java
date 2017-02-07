@@ -19,7 +19,7 @@ public class Latch {
     private Gamepad gamepad;
     private GameButton toggle;
 
-    public void setup(Gamepad pad, com.qualcomm.robotcore.hardware.Servo servo){
+    public void setup(Gamepad pad, Servo servo){
         latchServo = servo;
         gamepad = pad;
         latchServo.setDirection(com.qualcomm.robotcore.hardware.Servo.Direction.FORWARD);

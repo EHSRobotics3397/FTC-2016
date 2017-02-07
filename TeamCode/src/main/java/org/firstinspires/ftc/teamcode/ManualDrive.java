@@ -47,46 +47,43 @@ public class ManualDrive extends OpMode {
     @Override
     public void init(){
 
-        //leftMotor       = hardwareMap.dcMotor.get("leftMotor");
-        //rightMotor      = hardwareMap.dcMotor.get("rightMotor");
+        leftMotor       = hardwareMap.dcMotor.get("leftMotor");
+        rightMotor      = hardwareMap.dcMotor.get("rightMotor");
 
-        //collectorMotor  = hardwareMap.dcMotor.get("collectMotor");
+        collectorMotor  = hardwareMap.dcMotor.get("collectMotor");
 
         rewindMotor  = hardwareMap.dcMotor.get("throwMotor");
         latchServo   = hardwareMap.servo.get("latchServo");
         rewindSensor = hardwareMap.touchSensor.get("rewindSensor");
 
-        //liftMotorRight  = hardwareMap.dcMotor.get("rightLiftMotor");
-        //liftMotorLeft   = hardwareMap.dcMotor.get("leftLiftMotor");
+        liftMotorRight  = hardwareMap.dcMotor.get("rightLiftMotor");
+        liftMotorLeft   = hardwareMap.dcMotor.get("leftLiftMotor");
 
-       // thrower = new Thrower();
-       // thrower.setup(rewindMotor, latchServo, rewindButton, tensionButton, fireButton, rewindSensor); //add sensor
+        thrower = new Thrower();
+        thrower.setup(rewindMotor, rewindSensor, gamepad2, latchServo); //add sensor
 
-        //carDrive = new CarDrive();
-        //carDrive.setup(leftMotor, rightMotor, gamepad1);
+        carDrive = new CarDrive();
+        carDrive.setup(leftMotor, rightMotor, gamepad1);
 
-        //collector = new Collector();
-        //collector.setup(collectorMotor, gamepad2);
+        collector = new Collector();
+        collector.setup(collectorMotor, gamepad2);
 
-        //lift = new Lift();
-        //lift.setup(liftMotorLeft, liftMotorRight, gamepad2);
+        lift = new Lift();
+        lift.setup(liftMotorLeft, liftMotorRight, gamepad2);
 
-        latch = new Latch();
-        latch.setup(gamepad2, latchServo);
-
-        throwtest = new ThrowTest();
-        throwtest.setup(rewindMotor, rewindSensor, gamepad2);
+        //throwtest = new ThrowTest();
+        //throwtest.setup(rewindMotor, rewindSensor, gamepad2, latchServo);
 
     }
 
     @Override
     public void loop() {
-       //collector.update(telemetry);
-        //carDrive.update(telemetry);
-        //lift.update(telemetry);
-        //thrower.update(telemetry);
-        latch.update(telemetry);
-        throwtest.update(telemetry);
+
+        collector.update(telemetry);
+        carDrive.update(telemetry);
+        lift.update(telemetry);
+        thrower.update(telemetry);
+        //throwtest.update(telemetry);
     }
 
 }

@@ -56,12 +56,17 @@ public class CarDrive {
         leftMotor.setPower(leftPower);
         rightMotor.setPower(rightPower);
 
-        telemetry.addData("Power Left",  ": " + String.format("%.2f", leftPower));
-        telemetry.addData("Power Right", ": " + String.format("%.2f", rightPower));
+        int leftEncoder = leftMotor.getCurrentPosition();
+        int rightEncoder = rightMotor.getCurrentPosition();
 
-        telemetry.addData("Steer Left",          ": " + String.format("%.2f", leftSteer));
-        telemetry.addData("Steer Right",         ": " + String.format("%.2f", rightSteer));
+        telemetry.addData("Power L: ", String.format("%.2f", leftPower));
+        telemetry.addData("Power R: ", String.format("%.2f", rightPower));
 
+        telemetry.addData("Steer L: ", String.format("%.2f", leftSteer));
+        telemetry.addData("Steer R: ", String.format("%.2f", rightSteer));
+
+        telemetry.addData("Encoder L: ", String.format("%d", leftEncoder));
+        telemetry.addData("Enocder R: ", String.format("%d", rightEncoder));
 	}
 }
 

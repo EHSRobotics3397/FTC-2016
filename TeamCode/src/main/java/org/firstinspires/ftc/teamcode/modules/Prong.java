@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.modules;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-
 import org.firstinspires.ftc.teamcode.GameButton;
-
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -12,9 +10,9 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class Prong {
+
     private boolean out = false;
     private GameButton button;
-
     private DcMotor leftMotor;
     private DcMotor rightMotor;
 

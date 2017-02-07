@@ -1,103 +1,142 @@
 package org.firstinspires.ftc.teamcode.modules;
 
-/**
- * Created by greenteam on 1/20/17.
- * Used to throw the ball.
- */
-
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.GameButton;
+import org.firstinspires.ftc.teamcode.GameStick;
 
-public class Thrower {
+/**
+ * Created by Willem on 2/2/17.
+ * Main Drive Opmode
+ */
 
-   // private enum    State           {LOCKED, REWINDING, TENSIONING, RELEASED, IDLE}
 
-    private float   TENSION_POWER = 0.25f;
-    private float   REWIND_POWER  = -0.25f;
-    private double  RELEASED_POS; // add later from testing
-    private double  LOCKED_POS; // add later
-
-   // private State state = State.LOCKED;
+public class Thrower{
 
     private DcMotor     rewindMotor;
-    private Servo       latchServo;
-    private GameButton  rewindButton;
-    private GameButton  tensionButton;
-    private TouchSensor sensor;
-    private GameButton  releaseTrigger;
-    private int         EncoderEnd; // add later
-    private int         EncoderStart = 0;
-    private int         EncoderCount = 0;
+    private TouchSensor rewindSensor;
+    private int encoderStart = 0;
+    private int encoderVal = encoderStart;
+    private boolean running = false;
+    private GameStick  rTrigger;
+    private Servo   latchServo;
+    private boolean latchOpen = false;
+    double closePosition = 1.0;
+    double firePosition = 0.5;
+    private int fireVal = -1080;
+    private int rewindVal = 0;
+    private String latchState = "Closed";
+    private Gamepad gamepad;
+    private enum State {RELEASED, REWINDING, LOCKED, TENSIONING}
+    private State state;
+    private int hysteresis = 15;
+    private String stateString;
+    private GameButton aButton;
 
+    public void setup(DcMotor rewind,TouchSensor sensor, Gamepad pad, Servo latch){
+        rewindMotor = rewind;
+        rewindSensor = sensor;
+        latchServo = latch;
+        gamepad = pad;
+        aButton = new GameButton(pad, GameButton.Label.a);
+        setState(State.RELEASED);
+       // rewindMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        latchServo.setPosition(closePosition);
 
-    public void setup(DcMotor rewindMotor, Servo latchServo, GameButton rewindButton,
-                      GameButton tensionButton, GameButton releaseTrigger, TouchSensor sensor) {
-
-        this.rewindMotor = rewindMotor;
-        this.latchServo = latchServo;
-        this.rewindButton = rewindButton;
-        this.tensionButton = tensionButton;
-        this.releaseTrigger = releaseTrigger;
-        this.sensor = sensor;
-        EncoderStart();
     }
 
-    public void update(){
+    public void update(Telemetry telemetry) {
+        aButton.Update();
+       // rewindMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        if(rewindButton.IsDown()){
-            rewind();
-        }else if(tensionButton.IsDown()){
-            tension();
-        }else if(releaseTrigger.analogRead() >= 0.5){
-            releaseLatch();
-        }else{
-           idle();
+        encoderVal = rewindMotor.getCurrentPosition();
+
+        //check the sensors to set the state;
+
+        switch (state){
+
+            case RELEASED: release();
+                stateString = "Released";
+                break;
+            case REWINDING: rewind();
+                stateString = "Rewinding";
+                break;
+            case TENSIONING: tension();
+                stateString = "Tensioning";
+                break;
+            case LOCKED: lock();
+                stateString = "Locked";
+                break;
+
+        }
+
+        latchState = (latchOpen) ? "Open" : "Closed";
+        telemetry.addData("Servo ", latchState);
+        telemetry.addData("Encoder ", ": " + Integer.toString(encoderVal));
+        telemetry.addData("Running ", ": " + Boolean.toString(running));
+        telemetry.addData("Power ", Double.toString(rewindMotor.getPower()));
+        telemetry.addData("State ", stateString);
+    }
+
+    private void closeLatch(){
+        if(latchOpen) {
+            latchServo.setPosition(closePosition);
+            latchOpen = false;
+        }
+        encoderStart = rewindMotor.getCurrentPosition();
+    }
+
+    public void openLatch(){
+        if(!latchOpen) {
+            latchServo.setPosition(firePosition);
+            latchOpen = true;
         }
     }
 
-    private void rewind(){
-        if(!sensor.isPressed()){
-            rewindMotor.setPower(REWIND_POWER);
-        } else {
-            rewindMotor.setPower(0);
-            lockLatch();
-            // state = State.LOCKED;
+    private void lock(){
+        rewindMotor.setPower(0.0f);
+        running = false;
+        closeLatch();
+
+        if(aButton.Press()){
+            setState(State.TENSIONING);
         }
     }
+
+    private void rewind() {
+            openLatch();
+        rewindMotor.setPower(0.1f);
+        running = true;
+        if(rewindSensor.isPressed()){
+            setState(State.LOCKED);
+        }
+    }
+
+
 
     private void tension(){
-        while(EncoderCount < EncoderEnd){
-            // state = State.TENSIONING;
-            rewindMotor.setPower(TENSION_POWER);
-            readEncoders();
+        running = true;
+        encoderVal = rewindMotor.getCurrentPosition();
+        rewindMotor.setPower(-0.5f);
+        if( (encoderVal- encoderStart) < fireVal){   //fireVal is NEGATIVE
+            setState(State.RELEASED);
         }
-        rewindMotor.setPower(0.0);
-        // state = State.IDLE;
     }
 
-    private void releaseLatch() {
-        latchServo.setPosition(RELEASED_POS);
-        //  state = State.RELEASED;
-    }
-    private void lockLatch() {
-        latchServo.setPosition(LOCKED_POS);
-        // state = State.LOCKED;
-    }
-
-    private void idle() {
-        rewindMotor.setPower(0.0);
-        // state = State.IDLE;
+    private void release(){
+        openLatch();
+        rewindMotor.setPower(0.0f);
+        if(aButton.Press()){
+            setState(State.REWINDING);
+        }
     }
 
-    private void EncoderStart() {
-        EncoderStart = rewindMotor.getCurrentPosition();
+    private void setState(State newState){
+        state = newState;
     }
 
-    private void readEncoders() {
-        EncoderCount = rewindMotor.getCurrentPosition() - EncoderStart;
-    }
 
 }
