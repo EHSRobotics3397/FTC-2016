@@ -44,6 +44,8 @@ public class VuforiaTest extends LinearOpMode {
 
     private float Inches2mm = 25.4f;
     private float Mm2Inches = 1.0f/25.4f;
+    private float Mm2Feet = Mm2Inches/12.0f;
+    private double Radian2Degrees = 180.0/Math.PI;
 
     private OpenGLMatrix blueBeacon1;
     private OpenGLMatrix blueBeacon2;
@@ -76,17 +78,36 @@ public class VuforiaTest extends LinearOpMode {
             //a more robust approach - figure out what images we have in the field of view and
             //track using the closest. Want to avoid having to check all four.
             OpenGLMatrix latestLocation = listener01.getUpdatedRobotLocation();
-            if (latestLocation != null)
+            double angle = 0.0;
+            if (latestLocation != null) {
                 lastKnownLocation = latestLocation;
+            }
 
-            float distance = Mm2Inches*DistanceFlat(lastKnownLocation, target01.getLocation());
+            if (listener01.isVisible()) {
+                OpenGLMatrix facing = listener01.getPose();
+                VectorF v = facing.getTranslation();
+                telemetry.addData("Pose: ", XYZLocation(facing));
+                double x = v.getData()[0];
+                double y = v.getData()[1];
+                double z = v.getData()[2];
+                angle = 90.0 - Radian2Degrees*Math.atan2(-z, y);
+            }
+
+            float distance = Mm2Inches*DistanceFlat(lastKnownLocation, target01.getLocation())/12.0f;
+            //double angle = Radian2Degrees*Angle(lastKnownLocation, target01.getLocation());
 
             telemetry.addData("Tracking: " + target01.getName(), listener01.isVisible());
             telemetry.addData("Tracking: " + target02.getName(), listener02.isVisible());
 
             telemetry.addData("Last known location: ", XYZLocation(lastKnownLocation));
             telemetry.addData("Target location: ", XYZLocation(target01.getLocation()));
-            telemetry.addData("Distance to target: ", String.format("%2.3f", distance));
+            telemetry.addData("Distance to target: ", String.format("%2.3f ft", distance));
+            //telemetry.addData("Orientation: ", Orientation(lastKnownLocation));
+            telemetry.addData("Angle to target: ", String.format("%2.3f deg", angle));
+
+            //figure out the angle to the target:
+            //right is +ve angle, left is -ve angle, in degrees.
+
             telemetry.update();
             idle();
         }
@@ -108,7 +129,11 @@ public class VuforiaTest extends LinearOpMode {
         vuforiaLocalizer = ClassFactory.createVuforiaLocalizer(parameters);
 
         visionTargets = vuforiaLocalizer.loadTrackablesFromAsset("FTC_2016-17");
-        phoneLocation = blueStart1;
+
+        //walking around: image is at my height (4t) so we pretend that camera is at 5 inches off floor.
+        //orientation is horizontal, with the back camera opening to the right when looking from the back.
+        //where do we want the origin of the robot. was (90,90,180)
+        phoneLocation = createMatrix(0,0,5.0f*Inches2mm,90,-90,180); //this is relative to the robot body.
 
         target01 = visionTargets.get(WHEELS);
         target01.setName("Wheels Target");
@@ -147,6 +172,28 @@ public class VuforiaTest extends LinearOpMode {
         return distance;
     }
 
+    private double Angle(OpenGLMatrix startPosition, OpenGLMatrix endPosition) {
+        VectorF vs = startPosition.getTranslation();
+        VectorF ve = endPosition.getTranslation();
+        VectorF offset = new VectorF(ve.getData());
+        offset.subtract(vs);
+        float[] xy = offset.getData();
+        double x = xy[0];
+        double y = xy[1];
+        telemetry.addData("Vector Offset: ", String.format("%3.2f, %3.2f", x*Mm2Feet, y*Mm2Feet));
+        double angle = Math.atan2(y, x);
+        return angle;
+    }
+
+    private String Orientation(OpenGLMatrix location){
+        float[] d = location.getData();
+        float u = d[3];
+        float v = d[4];
+        float w = d[5];
+        String s = String.format("Orientation: %3.2f, %3.2f, %3.2f", u, v, w);
+        return s;
+    }
+
     private String formatMatrix(OpenGLMatrix matrix) {
         return matrix.formatAsTransform();
     }
@@ -155,11 +202,11 @@ public class VuforiaTest extends LinearOpMode {
         StringBuffer buffer = new StringBuffer();
         VectorF v = matrix.getTranslation();
         float[] xyz = v.getData();
-        float x = Mm2Inches*xyz[0];
-        float y = Mm2Inches*xyz[1];
-        float z = Mm2Inches*xyz[2];
+        float x = Mm2Inches*xyz[0]/12.0f;
+        float y = Mm2Inches*xyz[1]/12.0f;
+        float z = Mm2Inches*xyz[2]/12.0f;
 
-        buffer.append(String.format("(%2.3f, %2.3f, %2.3f)", x, y, z));
+        buffer.append(String.format("(%2.3f, %2.3f, %2.3f) ft", x, y, z));
         return buffer.toString();
     }
 }
