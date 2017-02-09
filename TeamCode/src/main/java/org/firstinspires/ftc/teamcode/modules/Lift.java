@@ -52,7 +52,7 @@ public class Lift {
     }
 
     public void liftUp(){
-        double UP_SPEED = 0.1;
+        double UP_SPEED = 0.5;
         motorLeft.setPower(UP_SPEED);
         motorRight.setPower(UP_SPEED);
         liftStatus = "Up";

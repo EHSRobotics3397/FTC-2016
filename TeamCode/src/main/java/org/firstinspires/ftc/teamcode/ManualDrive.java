@@ -3,9 +3,12 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.modules.*;
+//import org.firstinspires.ftc.teamcode.modules.LineFollower;
+
 /**
  * Created by greenteam on 1/12/17.
  * Main Drive Opmode
@@ -15,14 +18,15 @@ import org.firstinspires.ftc.teamcode.modules.*;
 
 public class ManualDrive extends OpMode {
 
-    private DcMotor     rightMotor;
-    private DcMotor     leftMotor;
-    private DcMotor     collectorMotor;
-    private DcMotor     rewindMotor;
-    private DcMotor     liftMotorRight;
-    private DcMotor     liftMotorLeft;
-    private Servo       latchServo;
-    private TouchSensor rewindSensor;
+    private DcMotor      rightMotor;
+    private DcMotor      leftMotor;
+    private DcMotor      collectorMotor;
+    private DcMotor      rewindMotor;
+    private DcMotor      liftMotorRight;
+    private DcMotor      liftMotorLeft;
+    private Servo        latchServo;
+    private TouchSensor  rewindSensor;
+  //  private I2cDevice    lineSensor;
 
     // Register Control Buttons for Gamepad2
     private GameButton  collectorForward    = new GameButton(gamepad2, GameButton.Label.RBumper);
@@ -40,39 +44,35 @@ public class ManualDrive extends OpMode {
     private Collector collector;
     private Thrower thrower;
     private Lift lift;
-    private Prong prong;
     private Latch latch;
-    private ThrowTest throwtest;
+  //  private LineFollower lineFollower;
 
     @Override
     public void init(){
 
         leftMotor       = hardwareMap.dcMotor.get("leftMotor");
         rightMotor      = hardwareMap.dcMotor.get("rightMotor");
-
         collectorMotor  = hardwareMap.dcMotor.get("collectMotor");
-
-        rewindMotor  = hardwareMap.dcMotor.get("throwMotor");
-        latchServo   = hardwareMap.servo.get("latchServo");
-        rewindSensor = hardwareMap.touchSensor.get("rewindSensor");
-
+        rewindMotor     = hardwareMap.dcMotor.get("throwMotor");
+        latchServo      = hardwareMap.servo.get("latchServo");
+        rewindSensor    = hardwareMap.touchSensor.get("rewindSensor");
         liftMotorRight  = hardwareMap.dcMotor.get("rightLiftMotor");
         liftMotorLeft   = hardwareMap.dcMotor.get("leftLiftMotor");
 
-        thrower = new Thrower();
+        thrower         = new Thrower();
         thrower.setup(rewindMotor, rewindSensor, gamepad2, latchServo); //add sensor
 
-        carDrive = new CarDrive();
+        carDrive        = new CarDrive();
         carDrive.setup(leftMotor, rightMotor, gamepad1);
 
-        collector = new Collector();
+        collector       = new Collector();
         collector.setup(collectorMotor, gamepad2);
 
-        lift = new Lift();
+        lift            = new Lift();
         lift.setup(liftMotorLeft, liftMotorRight, gamepad2);
 
-        //throwtest = new ThrowTest();
-        //throwtest.setup(rewindMotor, rewindSensor, gamepad2, latchServo);
+      //  lineFollower    = new LineFollower();
+      //  lineFollower.setup(lineSensor);
 
     }
 
@@ -83,7 +83,8 @@ public class ManualDrive extends OpMode {
         carDrive.update(telemetry);
         lift.update(telemetry);
         thrower.update(telemetry);
-        //throwtest.update(telemetry);
+       // lineFollower.update(telemetry);
+
     }
 
 }

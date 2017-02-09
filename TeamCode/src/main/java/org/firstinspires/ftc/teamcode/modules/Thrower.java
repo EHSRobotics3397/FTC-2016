@@ -100,10 +100,9 @@ public class Thrower{
     }
 
     private void lock(){
-        rewindMotor.setPower(0.0f);
+
         running = false;
         closeLatch();
-
         if(aButton.Press()){
             setState(State.TENSIONING);
         }
@@ -111,9 +110,10 @@ public class Thrower{
 
     private void rewind() {
             openLatch();
-        rewindMotor.setPower(0.1f);
+        rewindMotor.setPower(0.225f);
         running = true;
         if(rewindSensor.isPressed()){
+            rewindMotor.setPower(0.0f);
             setState(State.LOCKED);
         }
     }
