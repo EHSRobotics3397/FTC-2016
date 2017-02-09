@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.GameStick;
 
 public class Thrower{
 
+    public enum State {RELEASED, REWINDING, LOCKED, TENSIONING}
+
     private DcMotor     rewindMotor;
     private TouchSensor rewindSensor;
     private int encoderStart = 0;
@@ -29,7 +31,7 @@ public class Thrower{
     private int rewindVal = 0;
     private String latchState = "Closed";
     private Gamepad gamepad;
-    private enum State {RELEASED, REWINDING, LOCKED, TENSIONING}
+
     private State state;
     private int hysteresis = 15;
     private String stateString;
@@ -38,6 +40,8 @@ public class Thrower{
     static final double LATCH_CLOSE_POSITION = 0.8;
     static final double LATCH_FIRE_POSITION = 0.5;
     static final long REWIND_WAIT_MS = 250;
+
+    boolean autoMode = false;
 
     public void setup(DcMotor rewind,TouchSensor sensor, Gamepad pad, Servo latch){
         rewindMotor = rewind;
@@ -82,6 +86,14 @@ public class Thrower{
         telemetry.addData("Running ", ": " + Boolean.toString(running));
         telemetry.addData("Power ", Double.toString(rewindMotor.getPower()));
         telemetry.addData("State ", stateString);
+    }
+
+    public void setAudoMode(boolean b) {
+        autoMode = b;
+    }
+
+    public State getState() {
+        return state;
     }
 
     private void closeLatch(){
@@ -137,7 +149,7 @@ public class Thrower{
         }
     }
 
-    private void setState(State newState)
+    public void setState(State newState)
     {
         startTime = System.currentTimeMillis();
         state = newState;

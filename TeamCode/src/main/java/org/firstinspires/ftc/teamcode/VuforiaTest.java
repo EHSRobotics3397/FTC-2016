@@ -133,7 +133,8 @@ public class VuforiaTest extends LinearOpMode {
         //walking around: image is at my height (4t) so we pretend that camera is at 5 inches off floor.
         //orientation is horizontal, with the back camera opening to the right when looking from the back.
         //where do we want the origin of the robot. was (90,90,180)
-        phoneLocation = createMatrix(0,0,5.0f*Inches2mm,90,-90,180); //this is relative to the robot body.
+        //phoneLocation = createMatrix(0,0,5.0f*Inches2mm,90, -90,180); //this is relative to the robot body.
+        phoneLocation = createMatrix(-2.0f,0,15.0f*Inches2mm,90, 90, 180); //this is relative to the robot body.
 
         target01 = visionTargets.get(WHEELS);
         target01.setName("Wheels Target");
