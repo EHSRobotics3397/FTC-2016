@@ -16,7 +16,7 @@ public class DriveAuto {
     private String stateName;
     private String failReason;
 
-    private float CLICKS_PER_REV        = 2808.0f;
+    private float CLICKS_PER_REV        = 560.0f;
     private float WHEEL_DIAMETER        = 7.0f;
     private float WHEEL_CIRCUMFERENCE   = (float) Math.PI* WHEEL_DIAMETER;
 
@@ -45,6 +45,7 @@ public class DriveAuto {
     }
 
     public void update() {
+        telemetry.addData("Wheel Circumference: ", Float.toString(WHEEL_CIRCUMFERENCE));
         if (state == State.IDLE)
             Idle();
         else if (state == State.DRIVING)
@@ -90,6 +91,12 @@ public class DriveAuto {
         rightEncoderStart   = rightMotor.getCurrentPosition();
         failReason          = "N/A";
         ChangeState(State.IDLE);
+    }
+
+    public void DisplayEncoders() {
+        telemetry.addData("L. Encoder: " , Integer.toString(leftMotor.getCurrentPosition()));
+
+        telemetry.addData("R. Encoder: " , Integer.toString(rightMotor.getCurrentPosition()));
     }
 
     public void Straight(float distance, float power) {
@@ -140,12 +147,14 @@ public class DriveAuto {
         else {
             double factor = PowerRampFactor(distance, distanceTarget, RAMP_THRESHOLD);
             telemetry.addData("Ramp factor: ", String.format("%3.2f", factor));
+            telemetry.addData("Distance: ", String.format("%3.2f", distance));
+            telemetry.addData("Distance Target: ", String.format("%3.2f", distanceTarget));
             double rightSteer     = 1.0 - (steering + 1.0) / 2.0;
             double leftSteer      = (steering + 1.0) / 2.0;
             //rightPower = factor*desiredPower * rightSteer;
             //leftPower = factor*desiredPower * leftSteer;
-            leftMotor.setPower(0.40);
-            rightMotor.setPower(0.40);
+            leftMotor.setPower(desiredPower);
+            rightMotor.setPower(desiredPower);
             //PowerDriveMotors(leftPower, rightPower);
         }
     }
@@ -208,8 +217,8 @@ public class DriveAuto {
         int leftTicks   = leftMotor.getCurrentPosition() - leftEncoderStart;
         int rightTicks  = rightMotor.getCurrentPosition() - rightEncoderStart;
         int meanTicks   = (leftTicks + rightTicks) / 2;
-        float distance  =  (float) meanTicks/CLICKS_PER_REV * WHEEL_CIRCUMFERENCE;
-        return distance;
+        float distance  =  ((float) meanTicks)/CLICKS_PER_REV * WHEEL_CIRCUMFERENCE;
+        return distance; //encoders are tracking in the opposite direction to power.
     }
 
     private float SpinRevs() {

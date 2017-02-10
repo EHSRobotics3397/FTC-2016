@@ -26,7 +26,7 @@ public class Auto01 extends OpMode {
     private String failReason;
     private long startTime;
 
-    private float delayTime = 5.0f; //secs
+    private float delayTime = 1.0f; //secs
 
     private State state;
     private State nextState;
@@ -49,13 +49,13 @@ public class Auto01 extends OpMode {
 
         DcMotor leftMotor       = hardwareMap.dcMotor.get("leftMotor");
         DcMotor rightMotor      = hardwareMap.dcMotor.get("rightMotor");
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftMotor.setDirection(DcMotor.Direction.REVERSE);
 
         driver = new DriveAuto();
         driver.setup(leftMotor, rightMotor, telemetry);
 
         if(gamepad1.a) {
-            delayTime = 5.0f;
+            delayTime = 1.0f;
         }
         ChangeState(State.IDLE);
         Display();
@@ -101,11 +101,14 @@ public class Auto01 extends OpMode {
         }
         driver.update();
         Display();
+        driver.DisplayEncoders();
+
     }
 
     private void Display() {
         telemetry.addData("State: ", stateName);
         telemetry.addData("Time: ",String.format("%3.2f s", ElapsedTimeInState()));
+
     }
 
     private void ChangeState(State newState) {
@@ -126,7 +129,7 @@ public class Auto01 extends OpMode {
     }
 
     private void Completed() {
-        //does nothing.
+        driver.DisplayEncoders();
     }
 
     //this can be used to drive straight, turn, spin or backup
@@ -135,7 +138,7 @@ public class Auto01 extends OpMode {
     //This is just used to issue the command and check for completion.
     private void Drive() {
         if (driver.getState() == DriveAuto.State.IDLE)
-            driver.Straight(3.1f*INCHES_PER_FOOT, 0.40f);
+            driver.Straight(2.5f*INCHES_PER_FOOT, 0.40f);
         else if (driver.getState() == DriveAuto.State.FAILED) {
             failReason = driver.FailReason();
             ChangeState(State.FAILED);
@@ -144,6 +147,8 @@ public class Auto01 extends OpMode {
             driver.Reset();
             ChangeState(nextState);
         }
+
+        driver.DisplayEncoders();
     }
 
     private void Throw() {
