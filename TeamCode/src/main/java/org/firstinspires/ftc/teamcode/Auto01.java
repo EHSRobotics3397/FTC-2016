@@ -21,7 +21,7 @@ public class Auto01 extends OpMode {
     private float WHEEL_DIAMETER = 7.0f;
     private float INCHES_PER_FOOT = 12.0f;
 
-    private enum State {IDLE, DELAYED, DRIVE, THROW1, HARVEST, THROW2, COMPLETED, FAILED };
+    private enum State {IDLE, DELAYED, DRIVE1, THROW1, HARVEST, THROW2, DRIVE2, COMPLETED, FAILED };
     private String stateName;
     private String failReason;
     private long startTime;
@@ -66,13 +66,13 @@ public class Auto01 extends OpMode {
         switch(state) {
             case IDLE:
                 stateName = "IDLE";
-                nextState = State.DRIVE;
+                nextState = State.DRIVE1;
                 Idle();
                 break;
-            case DRIVE:
-                stateName = "DRIVE";
-                nextState = State.COMPLETED;
-                Drive();
+            case DRIVE1:
+                stateName = "DRIVE1";
+                nextState = State.THROW1;
+                Drive(14.0f, 0.40f);
                 break;
             case THROW1:
                 stateName = "THROW1";
@@ -88,6 +88,11 @@ public class Auto01 extends OpMode {
                 stateName = "THROW2";
                 nextState = State.IDLE;
                 Throw();
+                break;
+            case DRIVE2:
+                stateName = "DRIVE2";
+                nextState = State.IDLE;
+                Drive(14.0f, 0.40f);
                 break;
             case FAILED:
                 stateName = "FAILED";
@@ -136,9 +141,9 @@ public class Auto01 extends OpMode {
     //each driving segments should have it's own state (DRIVE1, DRIVE2..) and
     //matching function here. The DriveAuto class will take care of the driving.
     //This is just used to issue the command and check for completion.
-    private void Drive() {
+    private void Drive(float distance, float power) {
         if (driver.getState() == DriveAuto.State.IDLE)
-            driver.Straight(2.5f*INCHES_PER_FOOT, 0.40f);
+            driver.Straight(distance, power);
         else if (driver.getState() == DriveAuto.State.FAILED) {
             failReason = driver.FailReason();
             ChangeState(State.FAILED);
@@ -161,7 +166,7 @@ public class Auto01 extends OpMode {
 
     private void Harvest() {
         //run the collector for t1 secs, wait until t2, then we are done.
-        double HARVESTER_PWR = 0.4;
+        double HARVESTER_PWR = 0.3;
         double t1 = 0.2;
         double t2 = 1.0;
 
