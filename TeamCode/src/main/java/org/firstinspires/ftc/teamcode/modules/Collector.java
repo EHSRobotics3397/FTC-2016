@@ -9,14 +9,12 @@ import org.firstinspires.ftc.teamcode.GameButton;
  * Controls the toggling of the Collector
  */
 
-
-
 public class Collector {
     private String     collectMode;
     private DcMotor    collectorMotor;
-    GameButton rBumper;
-    GameButton lBumper;
-    static final double HARVESTER_PWR = 0.5;
+    private GameButton rBumper;
+    private GameButton lBumper;
+    static final double HARVESTER_PWR = 0.3;
 
     public void setup(DcMotor motor, Gamepad pad){
         collectorMotor  = motor;
@@ -25,9 +23,12 @@ public class Collector {
 
     }
 
+    // Controls
     public void update(Telemetry telemetry){
+
         lBumper.Update();
         rBumper.Update();
+
         if(rBumper.IsDown()){
             collectorMotor.setPower(-HARVESTER_PWR);
             collectMode = "Back";
@@ -38,6 +39,7 @@ public class Collector {
             collectorMotor.setPower((0.0));
             collectMode = "Idle";
         }
+
         telemetry.addData("Collector",  ": " + collectMode);
 
     }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.modules;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /**
  * Created by greenteam on 2/8/2017
  * Implements automatic driving such as
@@ -11,40 +12,36 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class DriveAuto {
 
     public enum State {IDLE, DRIVING, SPINNING, COMPLETED, FAILED };
-    private State state;
+    private State  state;
     private String stateName;
     private String failReason;
 
-    private float CLICKS_PER_REV = 560.0f;
-    private float WHEEL_DIAMETER = 7.0f;
-    private float WHEEL_CIRCUMFERENCE = (float) Math.PI* WHEEL_DIAMETER;
+    private float CLICKS_PER_REV        = 2808.0f;
+    private float WHEEL_DIAMETER        = 7.0f;
+    private float WHEEL_CIRCUMFERENCE   = (float) Math.PI* WHEEL_DIAMETER;
 
-    private float SPIN_DIAMETER = 17.0f;
-    private float SPIN_CIRCUMFERENCE = (float) Math.PI * SPIN_DIAMETER;
+    private float SPIN_DIAMETER         = 16.0f;
+    private float SPIN_CIRCUMFERENCE    = (float) Math.PI * SPIN_DIAMETER;
 
-    private float RAMP_THRESHOLD = 0.80f;
-    private double MIN_POWER = 0.15;
+    private float RAMP_THRESHOLD        = 0.80f;
+    private double MIN_POWER            = 0.15;
 
-    private float DRIVE_TIMEOUT = 5.0f; //secs
+    private float DRIVE_TIMEOUT         = 5.0f; //secs
 
-    private DcMotor rightMotor;
-    private DcMotor leftMotor;
-    private Telemetry telemetry;
+    private DcMotor     rightMotor;
+    private DcMotor     leftMotor;
+    private Telemetry   telemetry;
 
-    long startTime;
-    int leftEncoderStart;
-    int rightEncoderStart;
+    long    startTime;
+    int     leftEncoderStart;
+    int     rightEncoderStart;
 
     public void setup(DcMotor left, DcMotor right, Telemetry tel){
-        leftMotor = left;
-        rightMotor = right;
-        telemetry = tel;
-
-        ChangeState(State.IDLE);
+        leftMotor   = left;
+        rightMotor  = right;
+        telemetry   = tel;
+        Reset();
         Display();
-        leftEncoderStart = leftMotor.getCurrentPosition();
-        rightEncoderStart = rightMotor.getCurrentPosition();
-        failReason = "N/A";
     }
 
     public void update() {
@@ -52,6 +49,9 @@ public class DriveAuto {
             Idle();
         else if (state == State.DRIVING)
             Drive();
+        else if (state == State.FAILED) {
+            StopMotors();
+        }
     }
 
     public State getState() {
@@ -63,17 +63,17 @@ public class DriveAuto {
     }
 
     private void Display() {
-        telemetry.addData("State: " + stateName;
+        telemetry.addData("State:", stateName);
     }
 
     private void ChangeState(State newState) {
-        state = newState;
-        startTime = System.currentTimeMillis();
+        state       = newState;
+        startTime   = System.currentTimeMillis();
     }
 
     private float ElapsedTimeInState() {
         long elapsedTime  = System.currentTimeMillis() - startTime;
-        return ((float) elapsedTime)/1000.0f; // time in secs
+        return ((float) elapsedTime) / 1000.0f; // time in secs
     }
 
     //--------- public functions used to direct the driving
@@ -86,34 +86,36 @@ public class DriveAuto {
     private float steering;
 
     public void Reset() {
-        failReason = "N/A";
+        leftEncoderStart    = leftMotor.getCurrentPosition();
+        rightEncoderStart   = rightMotor.getCurrentPosition();
+        failReason          = "N/A";
         ChangeState(State.IDLE);
     }
 
     public void Straight(float distance, float power) {
-        distanceTarget = distance;
-        desiredPower = power;
-        steering = 0.0f;
+        distanceTarget  = distance;
+        desiredPower    = power;
+        steering        = 0.0f;
         ChangeState(State.DRIVING);
     }
 
     public void Turn(float steer, float distance, float power) {
-        distanceTarget = distance;
-        desiredPower = power;
-        steering = steer;
+        distanceTarget  = distance;
+        desiredPower    = power;
+        steering        = steer;
         ChangeState(State.DRIVING);
     }
 
     public void Spin(float rotation, float power) {
         //rotation is a float indicating number of spin turns (left is negative);
-        revsTarget = rotation;
-        desiredPower = Math.signum(rotation)*power;
+        revsTarget      = rotation;
+        desiredPower    = Math.signum(rotation)*power;
         ChangeState(State.SPINNING);
     }
 
     public void Backup(float steer, float distance, float power) {
-        distanceTarget = distance;
-        desiredPower = -power;
+        distanceTarget  = distance;
+        desiredPower    = -power;
         ChangeState(State.DRIVING);
     }
 
@@ -128,38 +130,45 @@ public class DriveAuto {
         float distance = DistanceDriven();
         if (ElapsedTimeInState() > DRIVE_TIMEOUT) {
             failReason = "Drive timed out";
+            StopMotors();
             ChangeState(State.FAILED);
         }
         else if (distance > distanceTarget) {
+            StopMotors();
             ChangeState(State.COMPLETED);
         }
         else {
             double factor = PowerRampFactor(distance, distanceTarget, RAMP_THRESHOLD);
+            telemetry.addData("Ramp factor: ", String.format("%3.2f", factor));
             double rightSteer     = 1.0 - (steering + 1.0) / 2.0;
             double leftSteer      = (steering + 1.0) / 2.0;
-            rightPower = factor*desiredPower * rightSteer;
-            leftPower = factor*desiredPower * leftSteer;
-            PowerDriveMotors(leftPower, rightPower);
+            //rightPower = factor*desiredPower * rightSteer;
+            //leftPower = factor*desiredPower * leftSteer;
+            leftMotor.setPower(0.40);
+            rightMotor.setPower(0.40);
+            //PowerDriveMotors(leftPower, rightPower);
         }
     }
 
     private void Spin() {
         //we stay in this state until we reach the distance (or some reasonable timeout)
-        double rightPower = 0.0;
-        double leftPower = 0.0;
-        float revs = SpinRevs();
+        double rightPower   = 0.0;
+        double leftPower    = 0.0;
+        float revs          = SpinRevs();
         // negative rotation?
         if (ElapsedTimeInState() > DRIVE_TIMEOUT) {
             failReason = "Spin timed out";
+            StopMotors();
             ChangeState(State.FAILED);
         }
         else if (revs > revsTarget) {
+            StopMotors();
             ChangeState(State.COMPLETED);
         }
         else {
-            double factor = PowerRampFactor(revs, revsTarget, RAMP_THRESHOLD);
-            leftPower = factor*desiredPower;
-            rightPower = -leftPower;
+            double factor   = PowerRampFactor(revs, revsTarget, RAMP_THRESHOLD);
+            leftPower       = factor*desiredPower;
+            rightPower      = -leftPower;
             PowerDriveMotors(leftPower, rightPower);
         }
     }
@@ -171,10 +180,15 @@ public class DriveAuto {
         else if (d1/d2 <= threshold)
             factor = 1.0;
         else {
-            float rampSize = (1.0f - threshold)/d2;
+            float rampSize = (1.0f - threshold)*d2;
             factor = (d2 - d1)/rampSize;
         }
         return factor;
+    }
+
+    private void StopMotors() {
+        leftMotor.setPower(0.0);
+        rightMotor.setPower(0.0);
     }
 
     //ensures that we have some min value that keeps the motor moving
@@ -191,19 +205,19 @@ public class DriveAuto {
     // Regular driving, takes the mean of the encoder changes
     // Spinning: takes the mean of the absolute values, since motors are moving in opposite direction.
     private float DistanceDriven() {
-        int leftTicks = leftMotor.getCurrentPosition() - leftEncoderStart;
-        int rightTicks = rightMotor.getCurrentPosition() - rightEncoderStart;
-        int meanTicks = (leftTicks + rightTicks) / 2;
-        float distance =  (float) meanTicks/CLICKS_PER_REV * WHEEL_CIRCUMFERENCE;
+        int leftTicks   = leftMotor.getCurrentPosition() - leftEncoderStart;
+        int rightTicks  = rightMotor.getCurrentPosition() - rightEncoderStart;
+        int meanTicks   = (leftTicks + rightTicks) / 2;
+        float distance  =  (float) meanTicks/CLICKS_PER_REV * WHEEL_CIRCUMFERENCE;
         return distance;
     }
 
     private float SpinRevs() {
-        int leftTicks = leftMotor.getCurrentPosition() - leftEncoderStart;
-        int rightTicks = rightMotor.getCurrentPosition() - rightEncoderStart;
-        int meanTicks = (Math.abs(leftTicks) + Math.abs(rightTicks))/2;
-        float distance =  (float) meanTicks/CLICKS_PER_REV * WHEEL_CIRCUMFERENCE;
-        float revs = distance / SPIN_CIRCUMFERENCE;
+        int leftTicks   = leftMotor.getCurrentPosition() - leftEncoderStart;
+        int rightTicks  = rightMotor.getCurrentPosition() - rightEncoderStart;
+        int meanTicks   = (Math.abs(leftTicks) + Math.abs(rightTicks))/2;
+        float distance  =  (float) meanTicks/CLICKS_PER_REV * WHEEL_CIRCUMFERENCE;
+        float revs      = distance / SPIN_CIRCUMFERENCE;
         return revs;
     }
 }

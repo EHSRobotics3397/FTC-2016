@@ -11,13 +11,10 @@ public class GameStick {
 
     private boolean release;
     private Gamepad pad;
-    private float x, y;
 
-    public enum Label{
-        Left, Right, LeftTrigger, RightTrigger
-    };
+    public enum Label{Left, Right, LeftTrigger, RightTrigger}
 
-    Label buttonLabel;
+    private Label buttonLabel;
 
     public GameStick(Gamepad somePad, Label someLabel) {
         pad         = somePad;

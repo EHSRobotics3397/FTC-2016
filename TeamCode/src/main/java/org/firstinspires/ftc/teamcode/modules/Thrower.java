@@ -6,12 +6,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.GameButton;
-import org.firstinspires.ftc.teamcode.GameStick;
 
 /**
  * Created by Willem on 2/2/17.
- * Main Drive Opmode
+ *
+ * Class for throwing mechanism, manages rewinding, tensioning, launching
+ *
+ * Pass in DcMotor, TouchSensor, Gamepad, Servo
  */
+
 
 
 public class Thrower{
@@ -20,44 +23,39 @@ public class Thrower{
 
     private DcMotor     rewindMotor;
     private TouchSensor rewindSensor;
-    private int encoderStart = 0;
-    private int encoderVal = encoderStart;
-    private boolean running = false;
-    private GameStick  rTrigger;
-    private Servo   latchServo;
-    private boolean latchOpen = false;
+    private int         encoderStart    = 0;
+    private int         encoderVal      = encoderStart;
+    private boolean     running         = false;
+    private Servo       latchServo;
+    private boolean     latchOpen       = false;
 
-    private int fireVal = -1080;
-    private int rewindVal = 0;
-    private String latchState = "Closed";
-    private Gamepad gamepad;
+    private int         fireVal         = -1080;
+    private String      latchState      = "Closed";
 
-    private State state;
-    private int hysteresis = 15;
-    private String stateString;
-    private GameButton aButton;
-    long startTime;
-    static final double LATCH_CLOSE_POSITION = 0.8;
-    static final double LATCH_FIRE_POSITION = 0.5;
-    static final long REWIND_WAIT_MS = 250;
+    private State       state;
+    private String      stateString;
+    private GameButton  aButton;
+    private long startTime;
 
-    boolean autoMode = false;
+    private static final double LATCH_CLOSE_POSITION    = 0.8;
+    private static final double LATCH_FIRE_POSITION     = 0.5;
+    private static final long   REWIND_WAIT_MS          = 250;
+
+    private boolean autoMode = false;
 
     public void setup(DcMotor rewind,TouchSensor sensor, Gamepad pad, Servo latch){
-        rewindMotor = rewind;
-        rewindSensor = sensor;
-        latchServo = latch;
-        gamepad = pad;
-        aButton = new GameButton(pad, GameButton.Label.a);
+        rewindMotor     = rewind;
+        rewindSensor    = sensor;
+        latchServo      = latch;
+        aButton         = new GameButton(pad, GameButton.Label.a);
+
         setState(State.RELEASED);
-       // rewindMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         latchServo.setPosition(LATCH_CLOSE_POSITION);
 
     }
 
     public void update(Telemetry telemetry) {
         aButton.Update();
-       // rewindMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         encoderVal = rewindMotor.getCurrentPosition();
 
@@ -81,6 +79,7 @@ public class Thrower{
         }
 
         latchState = (latchOpen) ? "Open" : "Closed";
+
         telemetry.addData("Servo ", latchState);
         telemetry.addData("Encoder ", ": " + Integer.toString(encoderVal));
         telemetry.addData("Running ", ": " + Boolean.toString(running));
@@ -88,7 +87,7 @@ public class Thrower{
         telemetry.addData("State ", stateString);
     }
 
-    public void setAudoMode(boolean b) {
+    public void setAutoMode(boolean b) {
         autoMode = b;
     }
 
@@ -104,7 +103,7 @@ public class Thrower{
         encoderStart = rewindMotor.getCurrentPosition();
     }
 
-    public void openLatch(){
+    private void openLatch(){
         if(!latchOpen) {
             latchServo.setPosition(LATCH_FIRE_POSITION);
             latchOpen = true;

@@ -19,13 +19,14 @@ public class Auto01 extends OpMode {
 
     private float CLICKS_PER_REV = 560.0f;
     private float WHEEL_DIAMETER = 7.0f;
+    private float INCHES_PER_FOOT = 12.0f;
 
-    private enum State {IDLE, DELAYED, DRIVE, THROW1, HARVEST, THROW2, FAILED };
+    private enum State {IDLE, DELAYED, DRIVE, THROW1, HARVEST, THROW2, COMPLETED, FAILED };
     private String stateName;
     private String failReason;
     private long startTime;
 
-    private float delayTime = 0.0f; //secs
+    private float delayTime = 5.0f; //secs
 
     private State state;
     private State nextState;
@@ -48,6 +49,8 @@ public class Auto01 extends OpMode {
 
         DcMotor leftMotor       = hardwareMap.dcMotor.get("leftMotor");
         DcMotor rightMotor      = hardwareMap.dcMotor.get("rightMotor");
+        rightMotor.setDirection(DcMotor.Direction.REVERSE);
+
         driver = new DriveAuto();
         driver.setup(leftMotor, rightMotor, telemetry);
 
@@ -68,7 +71,7 @@ public class Auto01 extends OpMode {
                 break;
             case DRIVE:
                 stateName = "DRIVE";
-                nextState = State.THROW1;
+                nextState = State.COMPLETED;
                 Drive();
                 break;
             case THROW1:
@@ -91,13 +94,17 @@ public class Auto01 extends OpMode {
                 nextState = State.FAILED;
                 Failed();
                 break;
+            case COMPLETED:
+                stateName = "COMPLETED";
+                Completed();
+                break;
         }
         driver.update();
         Display();
     }
 
     private void Display() {
-        telemetry.addData("State: ",stateName;
+        telemetry.addData("State: ", stateName);
         telemetry.addData("Time: ",String.format("%3.2f s", ElapsedTimeInState()));
     }
 
@@ -118,19 +125,25 @@ public class Auto01 extends OpMode {
             ChangeState(nextState);
     }
 
+    private void Completed() {
+        //does nothing.
+    }
+
     //this can be used to drive straight, turn, spin or backup
     //each driving segments should have it's own state (DRIVE1, DRIVE2..) and
     //matching function here. The DriveAuto class will take care of the driving.
     //This is just used to issue the command and check for completion.
     private void Drive() {
         if (driver.getState() == DriveAuto.State.IDLE)
-            driver.Straight(3.1f, 0.50f);
+            driver.Straight(3.1f*INCHES_PER_FOOT, 0.40f);
         else if (driver.getState() == DriveAuto.State.FAILED) {
             failReason = driver.FailReason();
             ChangeState(State.FAILED);
         }
-        else if (driver.getState() == DriveAuto.State.COMPLETED)
+        else if (driver.getState() == DriveAuto.State.COMPLETED){
+            driver.Reset();
             ChangeState(nextState);
+        }
     }
 
     private void Throw() {
@@ -143,8 +156,8 @@ public class Auto01 extends OpMode {
 
     private void Harvest() {
         //run the collector for t1 secs, wait until t2, then we are done.
-        double HARVESTER_PWR = 0.5;
-        double t1 = 0.40;
+        double HARVESTER_PWR = 0.4;
+        double t1 = 0.2;
         double t2 = 1.0;
 
         if (ElapsedTimeInState() > t2) {

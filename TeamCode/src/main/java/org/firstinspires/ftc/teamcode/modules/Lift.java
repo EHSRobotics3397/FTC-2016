@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.GameButton;
 /**
  * Created by Willem Hunt on 1/27/2017.
  * Controls the motion of the lift
+ * Pass 2 DcMotors, Gamepad
  */
 
 public class Lift {
@@ -45,20 +46,20 @@ public class Lift {
         telemetry.addData("Lift",  ": " + liftStatus);
     }
 
-    public void liftIdle(){
+    private void liftIdle(){
         motorLeft.setPower(0.0);
         motorRight.setPower(0.0);
         liftStatus = "Idle";
     }
 
-    public void liftUp(){
+    private void liftUp(){
         double UP_SPEED = 0.5;
         motorLeft.setPower(UP_SPEED);
         motorRight.setPower(UP_SPEED);
         liftStatus = "Up";
     }
 
-    public void liftDown(){
+    private void liftDown(){
         double DOWN_SPEED = -0.1;
         motorLeft.setPower(DOWN_SPEED);
         motorRight.setPower(DOWN_SPEED);
