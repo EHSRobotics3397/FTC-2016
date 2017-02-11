@@ -158,7 +158,7 @@ public class Auto01 extends OpMode {
 
     private void Throw() {
         if (thrower.getState() == Thrower.State.LOCKED) {
-            thrower.setState(Thrower.State.TENSIONING); //this will tension then throw the ball.
+            thrower.fire();
             ChangeState(nextState);
             ballsLaunched++;
         }
