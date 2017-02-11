@@ -40,8 +40,9 @@ public class Thrower{
     private static final double LATCH_CLOSE_POSITION    = 0.8;
     private static final double LATCH_FIRE_POSITION     = 0.5;
     private static final long   REWIND_WAIT_MS          = 250;
+    private static final float LOCK_WAIT_MS = 1000;
 
-    private boolean autoMode = false;
+    private boolean autoFire = false;
 
     public void setup(DcMotor rewind,TouchSensor sensor, Gamepad pad, Servo latch){
         rewindMotor     = rewind;
@@ -87,8 +88,8 @@ public class Thrower{
         telemetry.addData("State ", stateString);
     }
 
-    public void setAutoMode(boolean b) {
-        autoMode = b;
+    public void fire() {
+        autoFire = true;
     }
 
     public State getState() {
@@ -111,16 +112,16 @@ public class Thrower{
     }
 
     private void lock(){
-
         running = false;
         closeLatch();
-        if(aButton.Press()){
+        long elapsedTime  = System.currentTimeMillis() - startTime;
+        if(aButton.Press() || (autoFire && elapsedTime > LOCK_WAIT_MS)){
             setState(State.TENSIONING);
         }
     }
 
     private void rewind() {
-            openLatch();
+        openLatch();
         rewindMotor.setPower(0.225f);
         running = true;
         if(rewindSensor.isPressed()){
@@ -131,6 +132,7 @@ public class Thrower{
 
     private void tension(){
         running = true;
+        autoFire = false;
         encoderVal = rewindMotor.getCurrentPosition();
         rewindMotor.setPower(-0.5f);
         if( (encoderVal- encoderStart) < fireVal){   //fireVal is NEGATIVE
@@ -143,7 +145,7 @@ public class Thrower{
         rewindMotor.setPower(0.0f);
 
         long elapsedTime  = System.currentTimeMillis() - startTime;
-        if(aButton.Press() || elapsedTime > REWIND_WAIT_MS){
+        if(elapsedTime > REWIND_WAIT_MS){
             setState(State.REWINDING);
         }
     }
@@ -153,4 +155,5 @@ public class Thrower{
         startTime = System.currentTimeMillis();
         state = newState;
     }
+
 }
